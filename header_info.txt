@@ -1,0 +1,2 @@
+header: x-fb-friendly-name
+contentOfHeader: CometSinglePostDialogContentQuery
