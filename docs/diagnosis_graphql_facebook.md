@@ -11,14 +11,20 @@ When receiving the response. The information we need is under the `response.text
 It's an extremely big JSON file after parsing, but we can find individual comments by checking the following keys under the nested JSON extracted file:
 
 ```JSON
-"body": {
-    "text": ...content
-},
-"author": {
-    "id": ...
-    "name": ...
-    #Other fields may be useful in this part of the object
-},
-"created_time": some time value
+{
+    "node": {
+        "body": {
+            "text": "HEREISTHETEXT"
+        },
+        "author": {
+            "_typename": "MAYBETYPEOFUSER",
+            "id": "SOMESORTOFID",
+            "name": "USERNAME",
+
+
+        },
+        "created_time": "TIMEOFCREATION"
+    }
+}
 ```
 From here we can work on extracting the necessary info for each comment + user + time combo and then have a quite substantial dataset to feed to the model for verification of AI generated content.
