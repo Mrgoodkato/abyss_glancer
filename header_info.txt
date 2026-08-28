@@ -1,2 +1,4 @@
 header: x-fb-friendly-name
-contentOfHeader: CometSinglePostDialogContentQuery
+contentOfHeader: CometSinglePostDialogContentQuery, CommentsListComponentsPaginationQuery
+
+First comment load goes with CometSinglePostDialogContentQuery and then subsequent comment fetches come from CommentsListComponentsPaginationQuery

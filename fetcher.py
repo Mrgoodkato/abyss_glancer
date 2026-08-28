@@ -108,8 +108,6 @@ with sync_playwright() as p:
     print("Press CRTL + C to terminate")
 
     page = context.pages[0]
-
-    page.reload()
     
     # INFINITE LOOP (No 60 second limit!)
     try:
