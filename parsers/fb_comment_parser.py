@@ -15,13 +15,25 @@ FB_COMMENT_SHAPE = {
     "layer13": "edges"
 }
 
-def get_nodes_from_response(response_payload: list[dict])-> dict:
+FB_PAGINATION_COMMENT_SHAPE = {
+    "layer1": "node",
+    "layer2": "comment_rendering_instance_for_feed_location",
+    "layer3": "comments",
+    "layer4": "edges"
+}
+
+FB_COMMENT_MODE_MAP = {
+    "main_comment_load": FB_COMMENT_SHAPE,
+    "comments_section": FB_PAGINATION_COMMENT_SHAPE
+}
+
+def get_nodes_from_response(response_payload: list[dict], flag: str)-> dict:
     nodes = []
     probe = {}
     for element in response_payload:
         if probe:
             break
-        for layer_key, layer_val in FB_COMMENT_SHAPE.items():
+        for layer_key, layer_val in FB_COMMENT_MODE_MAP.get(flag).items():
             if layer_key == 'layer1':
                 probe = element.get(layer_val)
                 continue
