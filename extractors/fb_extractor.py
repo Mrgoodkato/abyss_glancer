@@ -1,3 +1,4 @@
+from global_consts.facebook import FB_URL_API, FB_HEADER_KEY, FB_HEADER_VALUES
 import logging
 import traceback
 import json
@@ -7,12 +8,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-FB_URL_API = "api/graphql/"
-FB_HEADER_KEY = "x-fb-friendly-name"
-FB_HEADER_VALUES = {
-    "main_comment_load": "CometSinglePostDialogContentQuery",
-    "comments_section": "CommentsListComponentsPaginationQuery"
-}
+
 
 def main_comment_extract(response):
     data = []

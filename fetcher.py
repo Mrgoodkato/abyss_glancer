@@ -1,6 +1,9 @@
 from playwright.sync_api import sync_playwright
-from parsers import fb_comment_parser
 from extractors import fb_extractor
+from parsers import general_parser
+from global_consts.api import LISTENING_PORT
+from global_consts.base_consts import RAW_SAVE_DIR
+from storer.db_handler import DBHandler
 import logging
 import json
 import os
@@ -8,17 +11,6 @@ import time
 import subprocess
 import threading
 import traceback
-
-
-RAW_SAVE_DIR = "./fetched_data"
-PARSED_SAVE_DIR = './parsed_data'
-
-LISTENING_PORT = 'http://localhost:9222'
-
-FB_HEADER_INFO = {
-    "header": "x-fb-friendly-name",
-    "header_val": "CometSinglePostDialogContentQuery"
-}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,28 +25,11 @@ subprocess.Popen([
     "--user-data-dir=/tmp/brave_dev_session"
 ])
 
+db = DBHandler()
+
 time.sleep(2)
 
 os.makedirs(RAW_SAVE_DIR, exist_ok=True)
-
-def background_parser(file_path: str, flag: str):
-    try:
-        with open(file_path, 'r') as parse_file:
-            body = json.load(parse_file)
-            nodes = fb_comment_parser.get_nodes_from_response(body, flag)
-
-            parsed_nodes = fb_comment_parser.parse_nodes_from_response(nodes)
-
-            parsed_file_path = f'{PARSED_SAVE_DIR}/facebook-parsed-comments_{time.time()}.json'
-
-            with open(parsed_file_path, 'w') as parsed_save:
-                json.dump(parsed_nodes, parsed_save)
-
-    except Exception as e:
-        logging.error(f'Error parsing file: {file_path} due to: {e}')
-        traceback.print_exc()
-        pass
-
 
 def handle_response(response):
 
@@ -70,16 +45,14 @@ def handle_response(response):
                 json.dump(raw_data, f)
                 print(f"Saved network packet: {filename}")
 
-            thread = threading.Thread(target=background_parser, args=(filename,data_flag))
+            thread = threading.Thread(target=general_parser.background_parser, args=(filename, data_flag, db))
             thread.start()
             
         except Exception as e:
+            db.conn.close()
             print(f'Failed saving the response packet {e}')
             traceback.print_exc()
             pass
-        
-
-
 
                 
 with sync_playwright() as p:
@@ -89,7 +62,7 @@ with sync_playwright() as p:
 
     context.on('response', handle_response)
     
-    logging.info(f"Listening to port {LISTENING_PORT} - Scroll in browser's feed to grab responses.")
+    logging.info(f"Listening to port {LISTENING_PORT} \nScroll in browser's feed to grab responses.")
     logging.info("Press CRTL + C to terminate")
 
     page = context.pages[0]
