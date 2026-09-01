@@ -12,7 +12,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-def background_parser(file_path: str, flag: str, db_handler: DBHandler):
+def background_parser(file_path: str, flag: str):
     try:
         with open(file_path, 'r') as parse_file:
             body = json.load(parse_file)
@@ -24,8 +24,6 @@ def background_parser(file_path: str, flag: str, db_handler: DBHandler):
 
             with open(parsed_file_path, 'w') as parsed_save:
                 json.dump(parsed_nodes, parsed_save)
-
-            storer.store_single_parsed_data(parsed_file_path, db_handler)
 
     except Exception as e:
         logging.error(f'Error parsing file: {file_path} due to: {e}')

@@ -4,6 +4,7 @@ from parsers import general_parser
 from global_consts.api import LISTENING_PORT
 from global_consts.base_consts import RAW_SAVE_DIR
 from storer.db_handler import DBHandler
+from storer.storer import Storer
 import logging
 import json
 import os
@@ -45,11 +46,10 @@ def handle_response(response):
                 json.dump(raw_data, f)
                 print(f"Saved network packet: {filename}")
 
-            thread = threading.Thread(target=general_parser.background_parser, args=(filename, data_flag, db))
+            thread = threading.Thread(target=general_parser.background_parser, args=(filename, data_flag))
             thread.start()
             
         except Exception as e:
-            db.conn.close()
             print(f'Failed saving the response packet {e}')
             traceback.print_exc()
             pass
@@ -72,5 +72,13 @@ with sync_playwright() as p:
         while True:
             page.wait_for_timeout(1000)
     except KeyboardInterrupt:
-        logging.info("\nTerminated program.")
-        traceback.print_exc()
+        browser.close()
+        logging.info("\nTerminated browser connection.")
+
+logging.info('Waiting for thread workers to finish...')
+time.sleep(2)
+
+storer = Storer(db)
+storer.get_parsed_files()
+storer.store_comment_data()
+storer.cleanup_data()

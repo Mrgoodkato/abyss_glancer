@@ -45,7 +45,7 @@ class DBHandler:
             logging.info(f'Inserting comment with id {comment.get('id')} into db')
             self.cursor.execute("""
                 INSERT INTO comments (id, author, author_id, author_type, created_time, comment_text)
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 comment.get('id'),
                 comment.get('author'),
@@ -60,4 +60,11 @@ class DBHandler:
         except Exception as e:
             logging.error(f'Failed inserting comment id {comment.get('id')} into db')
             traceback.print_exc()
-        
+
+    def terminate_connection(self):
+        logging.info('Terminating db connection...')
+        try:
+            self.conn.close()
+            logging.info('Terminated db connection successfully')
+        except Exception as e:
+            logging.error(f'Error terminating connection - {e}')
