@@ -56,6 +56,8 @@ class DBHandler:
             ))
             self.conn.commit()
             logging.info(f'Successfully inserted comment id {self.cursor.lastrowid}')
+        except sqlite3.IntegrityError as ie:
+            logging.info(f'Comment entry already exists, skipping...')
 
         except Exception as e:
             logging.error(f'Failed inserting comment id {comment.get('id')} into db')

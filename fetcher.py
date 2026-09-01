@@ -56,7 +56,7 @@ def handle_response(response):
 
                 
 with sync_playwright() as p:
-    # Connect to active Chrome session
+    # Connect to active Chromium session
     browser = p.chromium.connect_over_cdp(LISTENING_PORT)
     context = browser.contexts[0]
 
@@ -72,7 +72,10 @@ with sync_playwright() as p:
         while True:
             page.wait_for_timeout(1000)
     except KeyboardInterrupt:
-        browser.close()
+        try:
+            browser.close()
+        except:
+            pass
         logging.info("\nTerminated browser connection.")
 
 logging.info('Waiting for thread workers to finish...')
