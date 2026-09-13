@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 from extractors import fb_extractor
-from parsers import general_parser
+from parsers.general_parser import background_parser
 from global_consts.api import LISTENING_PORT
 from global_consts.base_consts import RAW_SAVE_DIR
 from storer.db_handler import DBHandler
@@ -46,7 +46,7 @@ def handle_response(response):
                 json.dump(raw_data, f)
                 print(f"Saved network packet: {filename}")
 
-            thread = threading.Thread(target=general_parser.background_parser, args=(filename, data_flag))
+            thread = threading.Thread(target=background_parser, args=(filename, data_flag))
             thread.start()
             
         except Exception as e:

@@ -1,0 +1,12 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abyss_glancer"
+version = "0.1.0"
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["fecthed_data**", "test_responses*", "parsed_data*"]

@@ -1,5 +1,3 @@
-from storer.db_handler import DBHandler
-from storer import storer
 from parsers import fb_comment_parser
 from global_consts.base_consts import PARSED_SAVE_DIR
 import logging

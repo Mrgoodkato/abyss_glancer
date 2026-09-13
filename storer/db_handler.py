@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 import traceback
-from db_helpers import parse_db_records
+from storer.db_helpers import parse_db_records
 from pathlib import Path
 
 logging.basicConfig(
@@ -119,7 +119,7 @@ class DBHandler:
             self.cursor.execute("""
                 SELECT id, comment_text FROM comments WHERE analyzed = ?
             """, (
-                True
+                False,
             ))
             comments_data = self.cursor.fetchall()
 
