@@ -31,18 +31,25 @@ class Sender:
             logging.info(f"Sending comment id {comment.get("comment_id")} for analysis")
             result = analyze_comment(COLLAB_PUBLIC_URL, comment.get("comment_id"))
             if result:
-                logging.info(f"Successfully received analysis for comment ✅")
+                logging.info(f"Successfully received analysis for comment")
                 self.analyzed_comments.append(result)
                 self.op_results["successful"] += 1
                 time.sleep(0.5)
                 continue
 
-
-            logging.error(f"ERROR - Comment was not analyzed ❌")
+            logging.error(f"ERROR - Comment was not analyzed")
             self.op_results["failed"] += 1
 
         logging.info(f"Successfully analyzed {self.op_results.get("successful")} comments")
         if self.op_results.get("failed") > 0:
             logging.error(f"Failed on {self.op_results.get("failed")} comments, please check the logs")
 
+    def save_roberta_scores(self):
 
+        for result in self.analyzed_comments:
+            comment_id = result["comment"]
+            raw_scores = result["roberta_scores"]
+
+            self.db_handler.store_roberta_scores(comment_id, raw_scores)
+
+        self.db_handler.terminate_connection()

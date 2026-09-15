@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 import traceback
-from storer.db_helpers import parse_db_records
+from storer.db_helpers import parse_db_records, parse_scores_response
 from pathlib import Path
 
 logging.basicConfig(
@@ -20,7 +20,7 @@ class DBHandler:
         try:
             self.TMP_STORAGE_DB.parent.mkdir(parents=True, exist_ok=True)
 
-            logging.info(f'Connecting to db in {self.TMP_STORAGE_DB}')
+            logging.info(f'Connecting to db in {self.TMP_STORAGE_DB}' + "."*10)
             self.conn = sqlite3.connect(self.TMP_STORAGE_DB)
             self.cursor = self.conn.cursor()
 
@@ -34,6 +34,7 @@ class DBHandler:
                     schema_sql = schema_file.read()
 
                 self.cursor.executescript(schema_sql)
+                logging.info(f'Schema executed successfully {self.schema_path}')
 
         except Exception as e:
             logging.error(f'Failed to connect to DB in {self.TMP_STORAGE_DB}')
@@ -83,12 +84,14 @@ class DBHandler:
             traceback.print_exc()
 
 
-    def store_roberta_scores(self, comment_id: str, scores: dict):
+    def store_roberta_scores(self, comment_id: str, raw_scores: list[dict]):
+
+        scores = parse_scores_response(comment_id, raw_scores)
         
         try:
             logging.info(f"Inserting scores for comment id - {comment_id} in DB")
             self.cursor.execute("""
-                INSERT INTO roberta_scores (id, comment_id, score_negative, score_neutral, score__positive)
+                INSERT INTO roberta_scores (id, comment_id, score_negative, score_neutral, score_positive)
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 scores.get("id"),
@@ -99,6 +102,7 @@ class DBHandler:
             ))
             self.conn.commit()
             logging.info(f'Successfully inserted score id {self.cursor.lastrowid}')
+            self.mark_comment_analyzed(comment_id)
 
         except sqlite3.IntegrityError:
             logging.info(f"Score entry already exists, skipping...")
