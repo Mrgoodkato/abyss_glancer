@@ -3,3 +3,4 @@ fetched_data/
 parsed_data/
 test_responses/
 abyss_glancer.egg-info/
+__pycache__/

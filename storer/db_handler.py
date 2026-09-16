@@ -21,7 +21,7 @@ class DBHandler:
             self.TMP_STORAGE_DB.parent.mkdir(parents=True, exist_ok=True)
 
             logging.info(f'Connecting to db in {self.TMP_STORAGE_DB}' + "."*10)
-            self.conn = sqlite3.connect(self.TMP_STORAGE_DB)
+            self.conn = sqlite3.connect(self.TMP_STORAGE_DB, check_same_thread=False)
             self.cursor = self.conn.cursor()
 
             logging.info('Checking PRGAMA version...')
