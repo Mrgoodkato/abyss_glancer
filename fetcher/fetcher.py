@@ -87,9 +87,3 @@ class Fetcher:
                 print(f'Failed saving the response packet {e}')
                 traceback.print_exc()
                 pass
-
-                    
-
-
-
-

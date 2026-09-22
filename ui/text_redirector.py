@@ -2,7 +2,8 @@ import tkinter as tk
 
 # 1. Magic Basket to catch print() and logging rocks, putting them in UI
 class TextRedirector:
-    def __init__(self, widget):
+
+    def __init__(self, widget: tk.Text):
         self.widget = widget
 
     def write(self, text_string):
