@@ -40,8 +40,6 @@ class UI:
             self.btn_frame = tk.Frame(self.window)
             self.btn_frame.pack(pady=5)
             self.create_buttons()
-            if getattr(self, "sender", None):
-                self.check_sender_enabled()
             self.window.mainloop()
 
         except Exception as e:
@@ -79,17 +77,33 @@ class UI:
     def init_sender(self):
         logging.info("Starting Sender woker...")
         self.sender = Sender()
+        if getattr(self, "sender", None):
+            self.check_sender_enabled()
 
     def start_sender(self):
         logging.info("Sender is sending...")
-        self.sender.send_comments_for_analysis()
+        t = threading.Thread(
+            target=self.sender.send_comments_for_analysis, 
+            args=(
+                getattr(self, "start_sender_btn"),
+            ),
+            daemon=True
+
+        )
+        t.start()
 
     def store_sender_results(self):
         logging.info("Storting Sender results...")
-        self.sender.save_roberta_scores()
-
+        t = threading.Thread(
+            target=self.sender.save_roberta_scores, 
+            args=(
+                getattr(self, "store_sender_btn"),
+            ),
+            daemon=True)
+        t.start()
+        
     def check_sender_enabled(self):
-        logging.info("Checking for sender")
+        logging.info("Checking for sender...")
         if getattr(self.sender, "comment_data", None):
             for button in BUTTONS:
                 if button.get("disabled"):
@@ -98,6 +112,4 @@ class UI:
                         button["name"]
                     ).config(state=tk.NORMAL)
                     button["disabled"] = False
-
-
-    
+                    logging.info(f"Button for: {button.get("title")} enabled")

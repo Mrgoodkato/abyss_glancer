@@ -21,8 +21,6 @@ logging.basicConfig(
 
 class Fetcher:
 
-    db: DBHandler
-
     def __init__(self):
         
         logging.info('Starting chromium instance in port 9222')
