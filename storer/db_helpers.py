@@ -37,3 +37,18 @@ def parse_scores_response(comment_id: str, scores: list[dict])-> dict:
     parsed_scores["id"] = str(uuid.uuid4())
 
     return parsed_scores
+
+def parse_roberta_scores(scores: tuple)-> dict:
+
+    roberta_scores_range = range(len(scores))
+    if roberta_scores_range != 3:
+        logging.error(f"Scores failed to parse, iterator for this scores is different than 3 -> {roberta_scores_range}")
+        return None
+
+    roberta_scores ={
+        "negative": scores[0],
+        "neutral": scores[1],
+        "positive": scores[2]
+    }
+
+    return roberta_scores

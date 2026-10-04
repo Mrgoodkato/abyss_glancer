@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 import traceback
-from storer.db_helpers import parse_db_records, parse_scores_response
+from storer.db_helpers import parse_db_records, parse_scores_response, parse_roberta_scores
 from pathlib import Path
 
 logging.basicConfig(
@@ -133,6 +133,55 @@ class DBHandler:
             logging.error(f"Error retrieving un-analyzed comments from db {e}")
             traceback.print_exc()
 
+    def get_author_roberta_scores(self, author_id: str):
+
+        author_roberta_scores = {
+            "author_id": author_id,
+            "roberta_scores": []
+        }
+
+        try:
+            logging.info(f"Getting comment data for author id: {author_id}")
+            self.cursor.execute("""
+                SELECT id FROM comments WHERE author_id = ?
+                ORDER BY created_time DESC
+            """,(
+                author_id,
+            ))
+            comment_ids = self.cursor.fetchall()
+
+            for comment_id in comment_ids:
+
+                roberta_scores = self._get_roberta_scores(comment_id)
+                author_roberta_scores["roberta_scores"].append(roberta_scores)
+
+            return author_roberta_scores
+
+        except Exception as e:
+            logging.error(f"Error retrieving comment data for author_id: {author_id}")
+            traceback.print_exc()
+            return None
+
+    def _get_roberta_scores(self, comment_id: str):
+
+        try:
+            logging.info(f"Getting roberta_score data for comment_id: {comment_id}")
+
+            self.cursor.execute("""
+                SELECT * FROM roberta_scores WHERE comment_id = ?
+            """,(
+                comment_id,
+            ))
+
+            roberta_score = self.cursor.fetchone()
+            resulting_score = parse_roberta_scores(roberta_score)
+
+            return resulting_score
+
+        except Exception as e:
+            logging.error(f"Error getting roberta_score data for comment_id: {comment_id}")
+            traceback.print_exc()
+            return None       
 
 
     def terminate_connection(self):
