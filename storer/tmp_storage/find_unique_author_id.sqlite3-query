@@ -1,0 +1,7 @@
+-- database: ./app.db
+
+SELECT author_id,
+COUNT(*) AS ocurrence_count
+FROM comments
+GROUP BY author_id
+HAVING COUNT(*) > 1;

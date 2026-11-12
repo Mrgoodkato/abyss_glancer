@@ -1,11 +1,4 @@
 import math
-import logging
-import traceback
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 def calculate_roberta_weight_result(fechted_roberta_scores: list, post_index: int, total_posts: int):
 

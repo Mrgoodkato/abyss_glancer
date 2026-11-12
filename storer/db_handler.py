@@ -83,6 +83,23 @@ class DBHandler:
             logging.error(f"Error updating comment id {comment_id} analyzed status")
             traceback.print_exc()
 
+    def mark_author_logit_parsed(self, author_id: str):
+
+        try:
+            logging.info(f"Marking logit_parsed for author_id {author_id}")
+            self.cursor.execute("""
+                UPDATE comments SET logit_parsed = ? WHERE author_id = ?
+            """, (
+                True,
+                author_id
+            ))
+            self.conn.commit()
+            logging.info(f"Updated logit_parsed for author_id {author_id}")
+
+        except Exception as e:
+            logging.error(f"Error updating logit_parsed for author_id {author_id}")
+            traceback.print_exc()
+
 
     def store_roberta_scores(self, comment_id: str, raw_scores: list[dict]):
 
@@ -144,7 +161,7 @@ class DBHandler:
             logging.info(f"Getting comment data for author id: {author_id}")
             self.cursor.execute("""
                 SELECT id FROM comments WHERE author_id = ?
-                ORDER BY created_time DESC
+                ORDER BY created_time ASC
             """,(
                 author_id,
             ))
@@ -161,6 +178,56 @@ class DBHandler:
             logging.error(f"Error retrieving comment data for author_id: {author_id}")
             traceback.print_exc()
             return None
+
+    def get_author_comment_payload(self, author_id: str):
+
+        author_comment_payload = {
+            "author_id": author_id,
+            "comment_payload": ""
+        }
+
+        try:
+            logging.info(f"Getting comment payloads for author_id: {author_id}")
+            self.cursor.execute("""
+                SELECT comment_text FROM comments WHERE author_id = ?
+                ORDER BY created_time ASC
+            """, (
+                author_id,
+            ))
+            comment_payload_list = self.cursor.fetchall()
+
+            for comment in comment_payload_list:
+                author_comment_payload['comment_payload'] += comment
+
+            return author_comment_payload
+
+        except Exception as e:
+            logging.error(f"Error retrieving comment payload for author_id: {author_id}")
+            traceback.print_exc()
+            return None
+
+    def store_text_logit_scores(self, author_data: dict, logit_score: float):
+
+        author_id = author_data["author_id"]
+
+        try:
+            logging.info(f"Inserting logit score for author_id {author_id}")
+            self.cursor.execute("""
+                INSERT INTO logit_scores (author_id, comment_payload, logit_score)
+                VALUES(?, ?, ?)
+            """, (
+                author_id,
+                author_data["comment_payload"],
+                logit_score
+            ))
+            self.conn.commit()
+            self.mark_author_logit_parsed(author_id)
+            logging.info(f"Inserted logit score for author_id {author_id}")
+
+        except Exception as e:
+            logging.error(f"Error inserting logit score for author_id {author_id}")
+            traceback.print_exc()
+
 
     def _get_roberta_scores(self, comment_id: str):
 
