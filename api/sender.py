@@ -92,8 +92,3 @@ class Sender:
             current_post += 1
 
         return resulting_weight_data
-
-
-
-
-

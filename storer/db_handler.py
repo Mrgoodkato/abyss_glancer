@@ -46,8 +46,8 @@ class DBHandler:
         try:
             logging.info(f'Inserting comment with id {comment.get('id')} into db')
             self.cursor.execute("""
-                INSERT INTO comments (id, author, author_id, author_type, created_time, comment_text, analyzed)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO comments (id, author, author_id, author_type, created_time, comment_text, analyzed, logit_parsed)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 comment.get('id'),
                 comment.get('author'),
@@ -55,6 +55,7 @@ class DBHandler:
                 comment.get('author_type'),
                 comment.get('created_time'),
                 comment.get('comment_text'),
+                False,
                 False
             ))
             self.conn.commit()
@@ -227,6 +228,32 @@ class DBHandler:
         except Exception as e:
             logging.error(f"Error inserting logit score for author_id {author_id}")
             traceback.print_exc()
+
+    def get_author_list(self) -> dict:
+
+        author_dict = {}
+        
+        try:
+            logging.info(f"Fetching all author info from db...")
+            self.cursor.execute("""
+                SELECT author_id, MAX(author)
+                FROM comments
+                GROUP BY author_id;
+            """)
+            author_raw_list = self.cursor.fetchall()
+            if len(author_raw_list) >= 0:
+                logging.info(f"Found no authors in the comments db table, skipping this process")
+                return None
+            logging.info(f"Found {len(author_raw_list)} authors in the comments db table")
+
+            for author in author_raw_list:
+                author_dict[author[0]] = author[1]
+            return author_dict
+            
+        except Exception as e:
+            logging.error(f"Error fetching the author data from db - {e}")
+            traceback.print_exc()
+            return None
 
 
     def _get_roberta_scores(self, comment_id: str):

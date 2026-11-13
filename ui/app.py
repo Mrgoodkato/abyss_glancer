@@ -8,6 +8,7 @@ from ui.buttons import BUTTONS
 from ui.text_redirector import TextRedirector
 from fetcher.fetcher import Fetcher
 from api.sender import Sender
+from storer.db_handler import DBHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,7 +19,7 @@ class UI:
 
     def __init__(self):
         logging.info("Starting app")
-
+        
         try:
             self.window = tk.Tk()
             self.window.title("Abyss Glancer - Fetcher")
@@ -40,11 +41,37 @@ class UI:
             self.btn_frame = tk.Frame(self.window)
             self.btn_frame.pack(pady=5)
             self.create_buttons()
+
+            # Populate author_list
+            self.dropdown_frame = tk.Frame(self.window)
+            self.dropdown_frame.pack(pady=10)
+            db_handler = DBHandler()
+            self.author_data = db_handler.get_author_list()
+            if self.author_data:
+                self.create_author_dropdown()
+            
+            db_handler.terminate_connection()
+
             self.window.mainloop()
 
         except Exception as e:
             logging.error(f"Error starting app because - {e}")
             traceback.print_exc()
+
+
+    def get_selected_author_id(self):
+        selected_index = self.dropdown.current()
+
+
+    def create_author_dropdown(self):
+        self.author_list = list(self.author_data.values())
+        self.dropdown = ttk.Combobox(
+            self.dropdown_frame, 
+            values=self.author_list,
+            state="readonly"
+            )
+        self.dropdown.pack(pady=10)
+        self.dropdown.current(0)
 
     def create_buttons(self):
 
@@ -101,6 +128,13 @@ class UI:
             ),
             daemon=True)
         t.start()
+
+    def start_text_logit_processing(self):
+        logging.info("Starting Text Logit processing...")
+        t = threading.Thread(
+            target=self.sender.process_text_logit,
+            args=
+        )
         
     def check_sender_enabled(self):
         logging.info("Checking for sender...")

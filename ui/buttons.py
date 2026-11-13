@@ -35,5 +35,13 @@ BUTTONS = [
         "bg": "lightblue",
         "pack_side": "right", 
         "disabled": True
+    },
+    {
+        "name": "start_text_logit_btn",
+        "title": "Start Text Logit",
+        "method": "start_text_logit_processing",
+        "bg": "lightblue",
+        "pack_side": "right",
+        "disabled": True
     }
 ]
