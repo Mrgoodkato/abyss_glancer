@@ -229,6 +229,19 @@ class DBHandler:
             logging.error(f"Error inserting logit score for author_id {author_id}")
             traceback.print_exc()
 
+    def _get_author_number_of_comments(self, author_id: str):
+
+        try:
+            self.cursor.execute("""
+                SELECT COUNT(*) FROM comments WHERE author_id = ?
+            """, (
+                author_id,
+            ))
+            return self.cursor.fetchone()[0]
+        except Exception as e:
+            logging.error(f"Error fetching number of comments for author_id {author_id}")
+            return 0 
+
     def get_author_list(self) -> dict:
 
         author_dict = {}
@@ -241,20 +254,22 @@ class DBHandler:
                 GROUP BY author_id;
             """)
             author_raw_list = self.cursor.fetchall()
-            if len(author_raw_list) >= 0:
+            if len(author_raw_list) <= 0:
                 logging.info(f"Found no authors in the comments db table, skipping this process")
                 return None
             logging.info(f"Found {len(author_raw_list)} authors in the comments db table")
 
             for author in author_raw_list:
-                author_dict[author[0]] = author[1]
+                author_dict[author[0]] = {
+                    "name": author[1],
+                    "number_of_comments": self._get_author_number_of_comments(author[0])
+                }
             return author_dict
             
         except Exception as e:
             logging.error(f"Error fetching the author data from db - {e}")
             traceback.print_exc()
             return None
-
 
     def _get_roberta_scores(self, comment_id: str):
 

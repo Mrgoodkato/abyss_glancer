@@ -1,0 +1,5 @@
+-- database: ./app.db
+
+SELECT author_id, MAX(author)
+FROM comments
+GROUP BY author_id;

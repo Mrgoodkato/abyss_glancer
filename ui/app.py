@@ -48,7 +48,10 @@ class UI:
             db_handler = DBHandler()
             self.author_data = db_handler.get_author_list()
             if self.author_data:
+                logging.info(f"Creating author dropdown...")
                 self.create_author_dropdown()
+            else:
+                logging.info(f"No author data found, skipping author dropdown")
             
             db_handler.terminate_connection()
 
@@ -61,10 +64,12 @@ class UI:
 
     def get_selected_author_id(self):
         selected_index = self.dropdown.current()
+        return self.author_ids[selected_index]
 
 
     def create_author_dropdown(self):
-        self.author_list = list(self.author_data.values())
+        self.author_list = [author["name"] for author in self.author_data.values()]
+        self.author_ids = list(self.author_data.keys())
         self.dropdown = ttk.Combobox(
             self.dropdown_frame, 
             values=self.author_list,
@@ -72,6 +77,19 @@ class UI:
             )
         self.dropdown.pack(pady=10)
         self.dropdown.current(0)
+        self.status_text = tk.StringVar(value=f"Selected ID: {self.author_ids[0]}")
+        self.info_label = tk.Label(self.window, textvariable=self.status_text, font=("Arial", 11))
+        self.info_label.pack(pady=10)
+
+        self.dropdown.bind("<<ComboboxSelected>>", self.on_author_change)
+
+    def on_author_change(self, event):
+        idx = self.dropdown.current()
+        selected_id = self.author_ids[idx]
+        selected_name = self.dropdown.get()
+        
+        # Updating the StringVar automatically updates info_label!
+        self.status_text.set(f"Author: {selected_name} | ID: {selected_id}\nNumber of comments: {self.author_data[selected_id]["number_of_comments"]}")
 
     def create_buttons(self):
 
@@ -133,8 +151,10 @@ class UI:
         logging.info("Starting Text Logit processing...")
         t = threading.Thread(
             target=self.sender.process_text_logit,
-            args=
+            args=self.get_selected_author_id(),
+            daemon=True
         )
+        t.start()
         
     def check_sender_enabled(self):
         logging.info("Checking for sender...")
